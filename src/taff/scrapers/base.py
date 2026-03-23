@@ -15,6 +15,23 @@ logger = logging.getLogger(__name__)
 # Répertoire pour stocker les états de session Playwright
 SESSION_DIR = Path.home() / ".taff" / "sessions"
 
+# Vérifier si Playwright est disponible
+PLAYWRIGHT_AVAILABLE = False
+try:
+    from playwright.async_api import async_playwright  # noqa: F401
+    # Vérifier qu'un navigateur est installé
+    import subprocess
+    result = subprocess.run(
+        ["python3", "-c", "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); b = p.chromium.launch(headless=True, args=['--no-sandbox']); b.close(); p.stop()"],
+        capture_output=True, timeout=10,
+    )
+    if result.returncode == 0:
+        PLAYWRIGHT_AVAILABLE = True
+    else:
+        logger.info("Playwright installé mais navigateur non disponible. Mode httpx uniquement.")
+except Exception:
+    logger.info("Playwright non disponible. Mode httpx uniquement.")
+
 
 class BaseScraper(abc.ABC):
     """Interface commune pour les scrapers HTTP (httpx)."""
@@ -67,28 +84,38 @@ class BaseScraper(abc.ABC):
 
 
 class BrowserScraper(BaseScraper):
-    """Base pour les scrapers qui utilisent Playwright (sites avec anti-bot)."""
+    """Base pour les scrapers qui utilisent Playwright quand dispo, sinon httpx."""
 
     def __init__(self):
-        # Pas besoin de httpx client pour les scrapers navigateur
+        super().__init__()
         self._playwright = None
         self._browser = None
+        self._use_browser = PLAYWRIGHT_AVAILABLE
 
     async def _get_browser(self):
         """Lance Playwright et retourne le navigateur (lazy init)."""
+        if not self._use_browser:
+            return None
         if self._browser is None:
             from playwright.async_api import async_playwright
-            self._playwright = await async_playwright().start()
-            self._browser = await self._playwright.chromium.launch(
-                headless=settings.browser_headless,
-                slow_mo=settings.browser_slow_mo,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
-            )
+            try:
+                self._playwright = await async_playwright().start()
+                self._browser = await self._playwright.chromium.launch(
+                    headless=settings.browser_headless,
+                    slow_mo=settings.browser_slow_mo,
+                    args=["--no-sandbox", "--disable-dev-shm-usage"],
+                )
+            except Exception as e:
+                logger.warning(f"Playwright launch failed: {e}. Fallback httpx.")
+                self._use_browser = False
+                return None
         return self._browser
 
     async def _get_context(self):
         """Retourne un contexte avec session persistante (cookies sauvegardés)."""
         browser = await self._get_browser()
+        if browser is None:
+            return None
         storage_path = SESSION_DIR / f"{self.source}.json"
 
         if storage_path.exists():
@@ -105,6 +132,8 @@ class BrowserScraper(BaseScraper):
 
     async def _save_session(self, context):
         """Sauvegarder l'état de session (cookies, localStorage)."""
+        if context is None:
+            return
         SESSION_DIR.mkdir(parents=True, exist_ok=True)
         storage_path = SESSION_DIR / f"{self.source}.json"
         await context.storage_state(path=str(storage_path))
@@ -115,3 +144,4 @@ class BrowserScraper(BaseScraper):
             await self._browser.close()
         if self._playwright:
             await self._playwright.stop()
+        await super().close()
