@@ -113,6 +113,81 @@ async def scrape_page(request: Request):
     })
 
 
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """Page de configuration des identifiants."""
+    from taff.config import settings
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "sources": [s.value for s in Source],
+        "statuses": [s.value for s in CandidatureStatus],
+        "settings": settings,
+    })
+
+
+@app.post("/settings")
+async def save_settings(
+    request: Request,
+    apec_email: str = Form(""),
+    apec_password: str = Form(""),
+    indeed_email: str = Form(""),
+    indeed_password: str = Form(""),
+    cadremploi_email: str = Form(""),
+    cadremploi_password: str = Form(""),
+):
+    """Sauvegarder les identifiants dans un fichier .env."""
+    from taff.config import settings
+    from pathlib import Path
+    import os
+
+    # Chercher le .env dans le répertoire courant ou le home
+    env_path = Path.cwd() / ".env"
+    if not env_path.exists():
+        env_path = Path.home() / ".taff" / ".env"
+        env_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Lire le .env existant si présent
+    existing = {}
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                existing[key.strip()] = value.strip()
+
+    # Mettre à jour
+    updates = {
+        "TAFF_APEC_EMAIL": apec_email,
+        "TAFF_APEC_PASSWORD": apec_password,
+        "TAFF_INDEED_EMAIL": indeed_email,
+        "TAFF_INDEED_PASSWORD": indeed_password,
+        "TAFF_CADREMPLOI_EMAIL": cadremploi_email,
+        "TAFF_CADREMPLOI_PASSWORD": cadremploi_password,
+    }
+    for key, value in updates.items():
+        if value:  # Ne sauvegarder que les valeurs non vides
+            existing[key] = value
+            # Appliquer aussi en live
+            os.environ[key] = value
+
+    # Écrire
+    lines = [f"{k}={v}" for k, v in existing.items()]
+    env_path.write_text("\n".join(lines) + "\n")
+
+    # Recharger les settings
+    from taff.config import Settings
+    import taff.config
+    taff.config.settings = Settings()
+
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "sources": [s.value for s in Source],
+        "statuses": [s.value for s in CandidatureStatus],
+        "settings": taff.config.settings,
+        "saved": True,
+    })
+
+
 def start():
     """Point d'entrée pour lancer le serveur."""
     import uvicorn

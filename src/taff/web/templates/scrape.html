@@ -23,9 +23,20 @@
     </form>
 </div>
 
+<div class="card" style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted);">
+    <h2 style="font-size: 1rem;">Sources et prerequis</h2>
+    <table style="width: 100%; margin-top: 0.5rem;">
+        <tr><td><strong>HelloWork</strong></td><td style="color: var(--success);">Scraping public - aucun compte requis</td></tr>
+        <tr><td><strong>LinkedIn</strong></td><td style="color: var(--success);">Scraping public - aucun compte requis</td></tr>
+        <tr><td><strong>APEC</strong></td><td>Auth API - <a href="/settings">configurer identifiants</a></td></tr>
+        <tr><td><strong>Indeed</strong></td><td>Navigateur Playwright - <a href="/settings">configurer identifiants</a> + <code>playwright install chromium</code></td></tr>
+        <tr><td><strong>Cadremploi</strong></td><td>Navigateur Playwright - <a href="/settings">configurer identifiants</a> + <code>playwright install chromium</code></td></tr>
+    </table>
+</div>
+
 <div id="loading" class="loading" style="display: none;">
     <div class="spinner"></div>
-    <p style="margin-top: 1rem;">Scraping en cours... Cela peut prendre quelques secondes.</p>
+    <p style="margin-top: 1rem;">Scraping en cours... Cela peut prendre jusqu'a 30 secondes (navigateur).</p>
 </div>
 {% endblock %}
 

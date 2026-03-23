@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Configuration{% endblock %}
+
+{% block content %}
+<h1>Configuration</h1>
+
+{% if saved %}
+<div class="card" style="border-color: var(--success); background: #f0fdf4; margin-bottom: 1rem;">
+    <p style="color: var(--success); font-weight: 500;">Identifiants sauvegardés ! Relancez un scraping pour tester.</p>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom: 1rem; background: #eff6ff; border-color: #bfdbfe;">
+    <p style="font-size: 0.9rem; color: #1e40af;">
+        <strong>Info :</strong> Les identifiants sont sauvegardés dans un fichier <code>.env</code> local.
+        Vous pouvez aussi les configurer via des variables d'environnement (prefixe <code>TAFF_</code>).
+    </p>
+    <p style="font-size: 0.85rem; color: #1e40af; margin-top: 0.5rem;">
+        <strong>APEC</strong> : auth API (email/mot de passe APEC) &bull;
+        <strong>Indeed / Cadremploi</strong> : navigateur Playwright (les sessions sont sauvegardées) &bull;
+        <strong>HelloWork / LinkedIn</strong> : scraping public, pas besoin d'identifiants
+    </p>
+</div>
+
+<form method="post" action="/settings">
+    <div class="card">
+        <h2>APEC</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="apec_email">Email</label>
+                <input type="text" id="apec_email" name="apec_email" value="{{ settings.apec_email }}" placeholder="votre@email.com" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="apec_password">Mot de passe</label>
+                <input type="password" id="apec_password" name="apec_password" value="{{ settings.apec_password }}" placeholder="••••••••" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Indeed</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="indeed_email">Email</label>
+                <input type="text" id="indeed_email" name="indeed_email" value="{{ settings.indeed_email }}" placeholder="votre@email.com" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="indeed_password">Mot de passe</label>
+                <input type="password" id="indeed_password" name="indeed_password" value="{{ settings.indeed_password }}" placeholder="••••••••" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Cadremploi</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="cadremploi_email">Email</label>
+                <input type="text" id="cadremploi_email" name="cadremploi_email" value="{{ settings.cadremploi_email }}" placeholder="votre@email.com" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="cadremploi_password">Mot de passe</label>
+                <input type="password" id="cadremploi_password" name="cadremploi_password" value="{{ settings.cadremploi_password }}" placeholder="••••••••" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Sauvegarder</button>
+</form>
+{% endblock %}

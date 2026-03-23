@@ -20,6 +20,22 @@ class Settings(BaseSettings):
     # User-Agent pour le scraping
     user_agent: str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 
+    # Identifiants APEC
+    apec_email: str = ""
+    apec_password: str = ""
+
+    # Identifiants Indeed
+    indeed_email: str = ""
+    indeed_password: str = ""
+
+    # Identifiants Cadremploi
+    cadremploi_email: str = ""
+    cadremploi_password: str = ""
+
+    # Playwright
+    browser_headless: bool = True
+    browser_slow_mo: int = 0  # ms entre chaque action (utile pour debug)
+
     model_config = {"env_prefix": "TAFF_"}
 
 
