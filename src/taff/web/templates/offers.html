@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Offres{% endblock %}
+
+{% block content %}
+<h1>Offres d'emploi</h1>
+
+<form class="filters" method="get" action="/offers">
+    <div class="form-group">
+        <label for="search">Recherche</label>
+        <input type="text" id="search" name="search" value="{{ current_search }}" placeholder="Titre, entreprise...">
+    </div>
+    <div class="form-group">
+        <label for="source">Source</label>
+        <select id="source" name="source">
+            <option value="">Toutes</option>
+            {% for s in sources %}
+            <option value="{{ s }}" {% if current_source == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="status">Statut</label>
+        <select id="status" name="status">
+            <option value="">Tous</option>
+            {% for s in statuses %}
+            <option value="{{ s }}" {% if current_status == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+    </div>
+</form>
+
+{% for offer in offers %}
+<div class="card">
+    <div class="offer-header">
+        <div>
+            <div class="offer-title">
+                {% if offer.source_url %}
+                    <a href="{{ offer.source_url }}" target="_blank" rel="noopener">{{ offer.title }}</a>
+                {% else %}
+                    {{ offer.title }}
+                {% endif %}
+            </div>
+            <div class="offer-meta">
+                <span>{{ offer.company }}</span>
+                {% if offer.location %}<span>{{ offer.location }}</span>{% endif %}
+                {% if offer.salary %}<span>{{ offer.salary }}</span>{% endif %}
+                {% if offer.contract_type %}<span>{{ offer.contract_type }}</span>{% endif %}
+                {% if offer.published_at %}<span>{{ offer.published_at }}</span>{% endif %}
+            </div>
+        </div>
+        <div>
+            <span class="badge badge-source">{{ offer.source }}</span>
+            <span class="badge badge-{{ offer.status }}">{{ offer.status }}</span>
+        </div>
+    </div>
+
+    {% if offer.description %}
+    <details style="margin-top: 0.5rem;">
+        <summary style="cursor: pointer; color: var(--text-muted); font-size: 0.875rem;">Voir la description</summary>
+        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted); max-height: 200px; overflow-y: auto;">
+            {{ offer.description | truncate(500) }}
+        </div>
+    </details>
+    {% endif %}
+
+    <div class="offer-actions">
+        <form method="post" action="/offers/{{ offer.id }}/status" style="display: flex; gap: 0.5rem; align-items: center;">
+            <select name="status" class="inline" style="padding: 0.3rem;">
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if offer.status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="notes" placeholder="Notes..." value="{{ offer.notes or '' }}" style="width: 200px; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+            <button type="submit" class="btn btn-sm btn-primary">Mettre a jour</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+{% if not offers %}
+<div class="card">
+    <p style="color: var(--text-muted);">Aucune offre ne correspond aux filtres.</p>
+</div>
+{% endif %}
+
+<div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+    {% if page > 1 %}
+    <a href="/offers?page={{ page - 1 }}{% if current_source %}&source={{ current_source }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="btn btn-primary">Precedent</a>
+    {% endif %}
+    {% if offers | length == 25 %}
+    <a href="/offers?page={{ page + 1 }}{% if current_source %}&source={{ current_source }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="btn btn-primary">Suivant</a>
+    {% endif %}
+</div>
+{% endblock %}

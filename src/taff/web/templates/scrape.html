@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Scraper{% endblock %}
+
+{% block content %}
+<h1>Lancer un scraping</h1>
+
+<div class="card">
+    <form method="post" action="/scrape" id="scrape-form">
+        <div class="form-group">
+            <label for="keywords">Mots-cles (separes par des virgules)</label>
+            <input type="text" id="keywords" name="keywords" value="{{ default_keywords }}" placeholder="DSI, Directeur SI, CIO...">
+        </div>
+        <div class="form-group">
+            <label for="source">Source</label>
+            <select id="source" name="source">
+                <option value="all">Toutes les sources</option>
+                {% for s in sources %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="scrape-btn">Lancer le scraping</button>
+    </form>
+</div>
+
+<div id="loading" class="loading" style="display: none;">
+    <div class="spinner"></div>
+    <p style="margin-top: 1rem;">Scraping en cours... Cela peut prendre quelques secondes.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('scrape-form').addEventListener('submit', function() {
+    document.getElementById('scrape-btn').disabled = true;
+    document.getElementById('scrape-btn').textContent = 'Scraping en cours...';
+    document.getElementById('loading').style.display = 'block';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Taff{% endblock %} - Recherche d'emploi</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav>
+        <span class="logo">Taff</span>
+        <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Dashboard</a>
+        <a href="/offers" {% if request.url.path == "/offers" %}class="active"{% endif %}>Offres</a>
+        <a href="/scrape" {% if request.url.path == "/scrape" %}class="active"{% endif %}>Scraper</a>
+    </nav>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

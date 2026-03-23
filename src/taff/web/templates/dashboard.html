@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="number">{{ stats.total or 0 }}</div>
+        <div class="label">Total offres</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ stats.by_status.get('new', 0) }}</div>
+        <div class="label">Nouvelles</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ stats.by_status.get('interested', 0) }}</div>
+        <div class="label">Interessantes</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ stats.by_status.get('applied', 0) }}</div>
+        <div class="label">Candidatures</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ stats.by_status.get('interview', 0) }}</div>
+        <div class="label">Entretiens</div>
+    </div>
+</div>
+
+<h2>Par source</h2>
+<div class="stats-grid">
+    {% for source_name, count in stats.by_source.items() %}
+    <div class="stat-card">
+        <div class="number">{{ count }}</div>
+        <div class="label">{{ source_name }}</div>
+    </div>
+    {% endfor %}
+    {% if not stats.by_source %}
+    <div class="card">
+        <p style="color: var(--text-muted);">Aucune offre pour le moment. <a href="/scrape">Lancer un scraping</a> pour commencer.</p>
+    </div>
+    {% endif %}
+</div>
+
+<h2>Offres recentes</h2>
+{% for offer in recent_offers %}
+<div class="card">
+    <div class="offer-header">
+        <div>
+            <div class="offer-title">
+                {% if offer.source_url %}
+                    <a href="{{ offer.source_url }}" target="_blank" rel="noopener">{{ offer.title }}</a>
+                {% else %}
+                    {{ offer.title }}
+                {% endif %}
+            </div>
+            <div class="offer-meta">
+                <span>{{ offer.company }}</span>
+                {% if offer.location %}<span>{{ offer.location }}</span>{% endif %}
+                {% if offer.salary %}<span>{{ offer.salary }}</span>{% endif %}
+            </div>
+        </div>
+        <div>
+            <span class="badge badge-{{ offer.source }}">{{ offer.source }}</span>
+            <span class="badge badge-{{ offer.status }}">{{ offer.status }}</span>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if not recent_offers %}
+<div class="card">
+    <p style="color: var(--text-muted);">Pas encore d'offres. <a href="/scrape">Lancez votre premier scraping !</a></p>
+</div>
+{% endif %}
+{% endblock %}

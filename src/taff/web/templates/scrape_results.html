@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Resultats du scraping{% endblock %}
+
+{% block content %}
+<h1>Resultats du scraping</h1>
+
+<div class="card">
+    <h2>Resultats par source</h2>
+    {% for source_name, result in results.items() %}
+    <div class="result-item">
+        <div>
+            <strong>{{ source_name }}</strong>
+        </div>
+        <div>
+            {% if result.error %}
+                <span style="color: var(--danger);">Erreur: {{ result.error }}</span>
+            {% else %}
+                <span>{{ result.scraped }} trouvees, <strong>{{ result.new }} nouvelles</strong></span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+    <a href="/offers?status=new" class="btn btn-primary">Voir les nouvelles offres</a>
+    <a href="/scrape" class="btn btn-primary" style="background: var(--text-muted);">Relancer un scraping</a>
+</div>
+{% endblock %}
