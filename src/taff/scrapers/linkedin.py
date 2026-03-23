@@ -22,9 +22,7 @@ class LinkedInScraper(BaseScraper):
         params = {
             "keywords": keywords,
             "sortBy": "DD",  # Date décroissante
-            "f_C": "",
-            "position": 1,
-            "pageNum": 0,
+            "location": "France",
         }
         if criteria.location:
             params["location"] = criteria.location

@@ -1,7 +1,6 @@
 """Scraper pour Cadremploi.fr."""
 
 import logging
-import urllib.parse
 
 from bs4 import BeautifulSoup
 
@@ -29,12 +28,15 @@ class CadremploiScraper(BaseScraper):
 
         try:
             resp = await self.client.get(CADREMPLOI_URL, params=params)
+            if resp.status_code == 403:
+                logger.warning("Cadremploi: accès bloqué (403). Cadremploi nécessite un navigateur ou des cookies valides.")
+                return []
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "lxml")
 
+            # Tenter plusieurs sélecteurs (le site change souvent)
             cards = soup.select("li[class*='job-card'], div[class*='job-card'], article[class*='offer']")
             if not cards:
-                # Fallback: chercher des liens d'offres
                 cards = soup.select("a[href*='/emploi/offre-']")
 
             for card in cards[:20]:
@@ -42,14 +44,16 @@ class CadremploiScraper(BaseScraper):
                 company_el = card.select_one("[class*='company'], [class*='entreprise']")
                 location_el = card.select_one("[class*='location'], [class*='lieu'], [class*='city']")
                 salary_el = card.select_one("[class*='salary'], [class*='salaire']")
-                link_el = card.select_one("a[href*='/emploi/']") or card if card.name == "a" else None
 
                 title = title_el.get_text(strip=True) if title_el else ""
+                if not title and card.name == "a":
+                    title = card.get_text(strip=True)
                 if not title:
                     continue
 
                 href = ""
                 source_id = ""
+                link_el = card.select_one("a[href*='/emploi/']") or (card if card.name == "a" else None)
                 if link_el:
                     href = link_el.get("href", "")
                     if href and not href.startswith("http"):
@@ -67,7 +71,7 @@ class CadremploiScraper(BaseScraper):
                 offers.append(offer)
 
         except Exception as e:
-            logger.error(f"Erreur scraping Cadremploi: {e}")
+            logger.warning(f"Cadremploi: {e}")
 
         logger.info(f"Cadremploi: {len(offers)} offres trouvées")
         return offers

@@ -14,8 +14,10 @@
         <div>
             {% if result.error %}
                 <span style="color: var(--danger);">Erreur: {{ result.error }}</span>
+            {% elif result.scraped == 0 %}
+                <span style="color: var(--warning);">0 trouvees (site bloque ou aucun resultat)</span>
             {% else %}
-                <span>{{ result.scraped }} trouvees, <strong>{{ result.new }} nouvelles</strong></span>
+                <span style="color: var(--success);">{{ result.scraped }} trouvees, <strong>{{ result.new }} nouvelles</strong></span>
             {% endif %}
         </div>
     </div>

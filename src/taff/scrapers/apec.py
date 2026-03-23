@@ -1,7 +1,6 @@
 """Scraper pour APEC.fr - utilise l'API JSON publique."""
 
 import logging
-import json
 
 from taff.models import SearchCriteria
 from taff.scrapers.base import BaseScraper
@@ -37,6 +36,8 @@ class ApecScraper(BaseScraper):
                 headers={
                     "Content-Type": "application/json",
                     "Accept": "application/json",
+                    "Referer": "https://www.apec.fr/candidat/recherche-emploi.html/emploi",
+                    "Origin": "https://www.apec.fr",
                 },
             )
             resp.raise_for_status()
@@ -57,7 +58,7 @@ class ApecScraper(BaseScraper):
                 offers.append(offer)
 
         except Exception as e:
-            logger.error(f"Erreur scraping APEC: {e}")
+            logger.warning(f"APEC API indisponible: {e}. L'API APEC nécessite parfois un navigateur (CORS). Essayez depuis l'interface web APEC directement.")
 
         logger.info(f"APEC: {len(offers)} offres trouvées")
         return offers
