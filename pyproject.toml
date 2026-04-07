@@ -18,9 +18,16 @@ dependencies = [
     "rich>=13.0.0",
 ]
 
+[project.scripts]
+icloud-email-mcp = "taff.mcp.icloud_email:mcp.run"
+
 [project.optional-dependencies]
 browser = [
     "playwright>=1.40.0",
+]
+mcp = [
+    "mcp>=1.0.0",
+    "imapclient>=3.0.0",
 ]
 dev = [
     "pytest>=8.0.0",
